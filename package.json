@@ -1,0 +1,19 @@
+{
+  "name": "ilas",
+  "version": "0.1.0",
+  "description": "Integrity Layer for Agentic Systems",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "ts-node": "^10.9.2",
+    "@types/node": "^20.12.0"
+  }
+}
