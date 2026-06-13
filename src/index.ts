@@ -41,6 +41,15 @@ export { PrivilegeManager } from "./m6";
 export { ScanScheduler } from "./m1";
 export { DetectionRotator } from "./m2";
 export { ProbeManager, STARTER_PROBES } from "./m4";
+export { ConservationAuditor } from "./m8";
+export type {
+  IngestStatus as M8IngestStatus,
+  CloseStatus as M8CloseStatus,
+  IngestResult as M8IngestResult,
+  CloseResult as M8CloseResult,
+  PendingEntry as M8PendingEntry,
+  LivenessReport as M8LivenessReport,
+} from "./m8";
 
 // ── ILASKillStack ─────────────────────────────────────────────────────────────
 
@@ -54,6 +63,7 @@ import { PrivilegeManager } from "./m6";
 import { ScanScheduler } from "./m1";
 import { DetectionRotator } from "./m2";
 import { ProbeManager } from "./m4";
+import { ConservationAuditor } from "./m8";
 
 export interface KillStackStatus {
   state: IntegrityState;
@@ -65,6 +75,8 @@ export interface KillStackStatus {
   nextScanIn: number;
   rotationCycles: number;
   probeLibrarySize: number;
+  openSessions: number;
+  pendingPairs: number;
 }
 
 export class ILASKillStack {
@@ -77,6 +89,7 @@ export class ILASKillStack {
   readonly scanner:    ScanScheduler;
   readonly rotation:   DetectionRotator;
   readonly probes:     ProbeManager;
+  readonly auditor:    ConservationAuditor;
 
   constructor() {
     this.log        = new LockedEvidenceLog();
@@ -88,6 +101,7 @@ export class ILASKillStack {
     this.scanner    = new ScanScheduler(this.log);
     this.rotation   = new DetectionRotator(this.log);
     this.probes     = new ProbeManager(this.log);
+    this.auditor    = new ConservationAuditor(this.log);
   }
 
   status(): KillStackStatus {
@@ -101,6 +115,8 @@ export class ILASKillStack {
       nextScanIn:          this.scanner.getNextScanIn(),
       rotationCycles:      this.rotation.getRotationCount(),
       probeLibrarySize:    this.probes.getProbeCount(),
+      openSessions:        this.auditor.getOpenSessions(),
+      pendingPairs:        this.auditor.getPendingCount(),
     };
   }
 }
