@@ -168,9 +168,22 @@ export class VerdictEngine {
     return this.state;
   }
 
+  /**
+   * @deprecated Use {@link setDecayRate} + {@link evaluateFreshness} instead.
+   * The push-timer is retained for backwards compatibility; its internal
+   * re-arming chain is .unref()'d so it won't pin the Node event loop.
+   */
   setStalenessTimeout(ms: number): void {
     this.stalenessMs = ms;
     this.resetStalenessTimer();
+  }
+
+  clearStalenessTimeout(): void {
+    this.stalenessMs = null;
+    if (this.stalenessTimer !== null) {
+      clearTimeout(this.stalenessTimer);
+      this.stalenessTimer = null;
+    }
   }
 
   getState(): IntegrityState {
@@ -250,7 +263,7 @@ export class VerdictEngine {
     this.lastFreshAt = this.clock();
   }
 
-  // ── staleness (legacy push-timer; unchanged) ────────────────────────────────
+  // ── staleness (legacy push-timer; deprecated, .unref()'d) ──────────────────
 
   private resetStalenessTimer(): void {
     if (this.stalenessTimer !== null) {
@@ -265,8 +278,9 @@ export class VerdictEngine {
       if (next !== undefined) {
         this.transition(next, "staleness timeout: no verification cycle");
       }
-      // Re-arm so continued inactivity keeps degrading
       this.resetStalenessTimer();
     }, this.stalenessMs);
+    // unref so the re-arming chain never pins Node's event loop on shutdown
+    (this.stalenessTimer as NodeJS.Timeout).unref?.();
   }
 }
