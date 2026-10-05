@@ -24,8 +24,13 @@ export type {
   ProbeResult,
 } from "./types";
 
-export { LockedEvidenceLog } from "./l0";
-export type { VerifyResult } from "./l0";
+export { LockedEvidenceLog, L0WriteError } from "./l0";
+export type {
+  VerifyResult,
+  L0LoadState,
+  DurabilityInfo,
+  LockedEvidenceLogOptions,
+} from "./l0";
 
 export { CanaryManager } from "./m3";
 export type { CheckOutboundResult, CheckSeverity } from "./m3";
@@ -55,6 +60,7 @@ export type {
 
 import { IntegrityState } from "./types";
 import { LockedEvidenceLog } from "./l0";
+import type { DurabilityInfo, LockedEvidenceLogOptions } from "./l0";
 import { CanaryManager } from "./m3";
 import { DriftMonitor } from "./m5";
 import { VerdictEngine } from "./v0";
@@ -77,6 +83,12 @@ export interface KillStackStatus {
   probeLibrarySize: number;
   openSessions: number;
   pendingPairs: number;
+  logDurability: DurabilityInfo;
+}
+
+export interface ILASKillStackOptions {
+  /** Enable durable L0 by pointing at a JSONL file. Omit for in-memory. */
+  logPath?: string;
 }
 
 export class ILASKillStack {
@@ -91,8 +103,17 @@ export class ILASKillStack {
   readonly probes:     ProbeManager;
   readonly auditor:    ConservationAuditor;
 
-  constructor() {
-    this.log        = new LockedEvidenceLog();
+  constructor(options?: ILASKillStackOptions) {
+    this.log        = new LockedEvidenceLog(
+      options?.logPath ? { path: options.logPath } : undefined
+    );
+
+    // If a verified chain was loaded, suppress the bootstrap re-seed that module
+    // constructors (ProbeManager's appends) would otherwise emit on every restart.
+    // The guard is toggled here, at the assembly, so no mechanism module changes.
+    const loadedExisting = this.log.loadedExisting();
+    if (loadedExisting) this.log.beginReplayGuard();
+
     this.canary     = new CanaryManager(this.log);
     this.drift      = new DriftMonitor(this.log);
     this.verdict    = new VerdictEngine(this.log);
@@ -102,6 +123,8 @@ export class ILASKillStack {
     this.rotation   = new DetectionRotator(this.log);
     this.probes     = new ProbeManager(this.log);
     this.auditor    = new ConservationAuditor(this.log);
+
+    if (loadedExisting) this.log.endReplayGuard();
   }
 
   status(): KillStackStatus {
@@ -117,6 +140,7 @@ export class ILASKillStack {
       probeLibrarySize:    this.probes.getProbeCount(),
       openSessions:        this.auditor.getOpenSessions(),
       pendingPairs:        this.auditor.getPendingCount(),
+      logDurability:       this.log.getDurabilityInfo(),
     };
   }
 }
