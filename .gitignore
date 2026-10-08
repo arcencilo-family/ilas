@@ -2,3 +2,6 @@ node_modules/
 dist/
 .DS_Store
 .claude/
+
+# Private keys never belong in the repository (keygen writes <name>.key).
+*.key

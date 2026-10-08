@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────────────────────────────────────
 // ILAS / M8 Conservation Auditor
-// 2026-06-13 (CEST), Uncle Frank + AI colleagues
+// 2026-06-13 (CEST), Frank Böhm + AI colleagues
 //
 // First shipped invariant: TOOL-CALL <-> RESULT PAIRING.
 // Every tool_call has exactly one matching tool_result and vice versa.
@@ -21,13 +21,14 @@
 //      post-hoc by replaying L0 offline. Crash case = real-time miss,
 //      forensic replay catches.
 //
-// Severities, deterministic and W1-graded:
+// Severities, deterministic — each alarm is decided by a fact in the stream,
+// never by a probability:
 //   - RESULT with NO matching CALL                -> hard_alarm
-//       orphan; fabrication threat; strict-W1; real-time; ungameable in the
-//       pairing axis (an attacker cannot fake a matched pair without a real
-//       result existing in the stream).
+//       orphan; fabrication threat; strict (decided when the result arrives);
+//       real-time; ungameable in the pairing axis (an attacker cannot fake a
+//       matched pair without a real result existing in the stream).
 //   - SESSION_CLOSE with unmatched CALL(s)        -> soft_alarm
-//       dangling-at-close; deterministic boundary; W1-clean.
+//       dangling-at-close; decided at a deterministic boundary (the close).
 //   - dangling mid-session past danglingThresholdMs -> informational
 //       liveness hint; NOT graded as a security signal. The threshold absorbs
 //       upstream flush latency; it is NOT a probability cut.
@@ -118,7 +119,7 @@ export class ConservationAuditor {
       }
       set.add(callId);
     }
-    this.log?.append({
+    this.log?.enqueue({
       timestamp: ts,
       moduleId: "m8",
       eventType: "call_recorded",
@@ -141,7 +142,7 @@ export class ConservationAuditor {
     const record = this.calls.get(callId);
 
     if (!record) {
-      this.log?.append({
+      this.log?.enqueue({
         timestamp: ts,
         moduleId: "m8",
         eventType: "orphan_result",
@@ -159,7 +160,7 @@ export class ConservationAuditor {
     }
 
     record.matched = true;
-    this.log?.append({
+    this.log?.enqueue({
       timestamp: ts,
       moduleId: "m8",
       eventType: "pair_matched",
@@ -185,7 +186,7 @@ export class ConservationAuditor {
     }
 
     if (dangling.length === 0) {
-      this.log?.append({
+      this.log?.enqueue({
         timestamp: ts,
         moduleId: "m8",
         eventType: "session_closed",
@@ -196,7 +197,7 @@ export class ConservationAuditor {
       return { status: "clean", danglingCallIds: [] };
     }
 
-    this.log?.append({
+    this.log?.enqueue({
       timestamp: ts,
       moduleId: "m8",
       eventType: "session_closed",

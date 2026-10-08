@@ -43,7 +43,7 @@ export class DriftMonitor {
 
   registerParameter(id: string, value: number, structural = false): void {
     this.params.set(id, { baseline: value, current: value, structural });
-    this.log?.append({
+    this.log?.enqueue({
       timestamp: Date.now(),
       moduleId: "m5",
       eventType: "parameter_registered",
@@ -112,7 +112,7 @@ export class DriftMonitor {
       }
     }
 
-    this.log?.append({
+    this.log?.enqueue({
       timestamp: now,
       moduleId: "m5",
       eventType: "parameter_changed",

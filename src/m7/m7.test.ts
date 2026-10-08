@@ -98,6 +98,29 @@ check("L0 logs mismatch outcome", () => {
   assert.strictEqual(mismatches[0].moduleId, "m7");
 });
 
+// ── the trust matrix cannot be changed through a result ──────────────────────
+
+check("editing checkPermission().expectedLanes changes no later verdict, on any tracker", () => {
+  const t = new ProvenanceTracker();
+  const r = t.checkPermission("memory_write", "LaneA");
+  r.expectedLanes.push("LaneC");
+  assert.strictEqual(t.checkPermission("memory_write", "LaneC").permitted, false);
+  assert.strictEqual(new ProvenanceTracker().checkPermission("memory_write", "LaneC").permitted, false);
+  assert.deepStrictEqual(t.checkPermission("memory_write", "LaneA").expectedLanes, ["LaneA"]);
+});
+
+check("editing tagAction().expectedLanes leaves the logged entry and later mismatches alone", () => {
+  const l = new LockedEvidenceLog();
+  const t = new ProvenanceTracker(l);
+  const r = t.tagAction("canary_plant", "LaneB");
+  r.expectedLanes.push("LaneA");
+  assert.deepStrictEqual(l.verify(), { valid: true });
+  assert.deepStrictEqual(l.getEntry(0)!.parameters.expectedLanes, ["LaneB"]);
+  const again = t.tagAction("canary_plant", "LaneA");
+  assert.strictEqual(again.permitted, false, "a caller's edit turned a mismatch into permitted");
+  assert.strictEqual(t.getMismatchCount(), 1);
+});
+
 // ── L0 chain integrity ────────────────────────────────────────────────────────
 
 check("L0 chain valid after all operations", () => {

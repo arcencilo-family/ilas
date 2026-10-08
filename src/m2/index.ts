@@ -51,7 +51,7 @@ export class DetectionRotator {
 
   registerFamily(id: string, name: string, checkFn: () => ModuleSignal): void {
     this.families.set(id, { id, name, checkFn });
-    this.log?.append({
+    this.log?.enqueue({
       timestamp: Date.now(),
       moduleId: "m2",
       eventType: "family_registered",
@@ -88,22 +88,31 @@ export class DetectionRotator {
     }
     const selectedFamilies = pool.slice(0, count);
 
-    this.activeFamilyIds = selectedFamilies;
+    // The active set, the rotation record, the evidence entry and the result
+    // each get their own copy: what a caller does with the result cannot change
+    // which families run or what was recorded.
+    this.activeFamilyIds = [...selectedFamilies];
     this.lastRotationAt  = now;
 
     const rotationIndex = this.rotations.length;
-    this.rotations.push({ index: rotationIndex, selectedFamilies, seed, commitment, timestamp: now });
+    this.rotations.push({
+      index: rotationIndex,
+      selectedFamilies: [...selectedFamilies],
+      seed,
+      commitment,
+      timestamp: now,
+    });
 
-    this.log?.append({
+    this.log?.enqueue({
       timestamp: now,
       moduleId: "m2",
       eventType: "rotation",
       provenanceTag: "LaneB",
-      parameters: { rotationIndex, selectedFamilies, commitment, count },
+      parameters: { rotationIndex, selectedFamilies: [...selectedFamilies], commitment, count },
       outcome: "ok",
     });
 
-    return { selectedFamilies, rotationIndex, seed, commitment };
+    return { selectedFamilies: [...selectedFamilies], rotationIndex, seed, commitment };
   }
 
   getActiveFamilies(): string[] {
@@ -137,7 +146,7 @@ export class DetectionRotator {
       allClean,
       timestamp: Date.now(),
     });
-    this.log?.append({
+    this.log?.enqueue({
       timestamp: Date.now(),
       moduleId: "m2",
       eventType: "rotation_results_tracked",

@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────────────────────────────────────
 // ILAS — V0 confidence-decay tests
-// Added: 2026-06-13 (CEST) — Uncle Frank + AI colleagues
+// Added: 2026-06-13 (CEST) — Frank Böhm + AI colleagues
 // Deterministic: uses an injected clock, so no real waiting.
 // ──────────────────────────────────────────────────────────────────────────────
 

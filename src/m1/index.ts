@@ -53,7 +53,7 @@ export class ScanScheduler {
     this.nextScanAt = now + intervalMs;
     this.scheduledCount++;
 
-    this.log?.append({
+    this.log?.enqueue({
       timestamp: now,
       moduleId: "m1",
       eventType: "schedule_generated",

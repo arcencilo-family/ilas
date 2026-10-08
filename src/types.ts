@@ -11,6 +11,41 @@ export type CanaryDepth = "shallow" | "medium" | "deep";
 
 export type SignalSeverity = "clean" | "soft_alarm" | "hard_alarm";
 
+/**
+ * The fields of a clerk submission receipt that L0 reads (docs/S4-WIRE-SPEC.md
+ * §7.1). A clerk may write more fields than these; every field it writes except
+ * receipt_hash and signature is signed, and L0 verifies (§7.3), and keeps on the
+ * entry, the whole record it is handed, not just the fields typed here. ILAS
+ * depends only on this shape and never imports a clerk implementation. The
+ * reference clerk in packages/clerk writes a superset of it.
+ */
+export interface ClerkSubmissionReceipt {
+  readonly kind: "SUBMISSION";
+  /** The submitter the clerk booked this for. L0 requires its route's submitterId. */
+  readonly submitter_id: string;
+  /** The channel the clerk booked this on. L0 requires its route's channel. */
+  readonly channel: string;
+  readonly clerk_id: string;
+  readonly clerk_boot_id: string;
+  readonly separation: "SEPARATE_PROCESS" | "IN_PROCESS_NO_SEPARATION";
+  readonly separation_warning: string | null;
+  readonly clerk_principal: string;
+  readonly intake: "SOCKET" | "LOCAL_CALL" | "CLERK_INTERNAL";
+  readonly clerk_seq: number;
+  readonly clerk_time: {
+    readonly wall_ms: number;
+    readonly monotonic_ns: string;
+  };
+  readonly prev_receipt_hash: string;
+  readonly receipt_hash: string;
+  readonly signature: string;
+  readonly signature_alg: "ed25519";
+  readonly declared_timestamp: number | null;
+  readonly payload_commitment: string;
+  readonly payload_retained: boolean;
+  readonly payload_canonical: string | null;
+}
+
 export interface LogEntry {
   sequenceNumber: number;
   hash: string;
@@ -21,6 +56,13 @@ export interface LogEntry {
   provenanceTag: ProvenanceTag;
   parameters: Record<string, unknown>;
   outcome: string;
+  /**
+   * Absent only on legacy/explicitly unstamped logs. With a clerk route, L0
+   * checks it (docs/S4-WIRE-SPEC.md §7.3) before an entry commits, and again for
+   * every entry loaded from disk; a log that holds a missing or failing receipt
+   * loads as CANNOT_VERIFY.
+   */
+  clerkReceipt?: ClerkSubmissionReceipt;
 }
 
 export interface CanaryToken {

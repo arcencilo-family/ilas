@@ -1,0 +1,152 @@
+{
+  "generated_by": "scripts/s4-test-vectors.ts",
+  "test_key_warning": "Public test seeds: 0x42 × 32 for the witness key, 0x43 × 32 for the clerk key. Never use either for a real witness or clerk.",
+  "witness_public_key_spki_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAIVL40Zt5HSRFMkLhXy6rbLfP+ntqXtMAl5YOBpiB2xI=\n-----END PUBLIC KEY-----\n",
+  "clerk_public_key_spki_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAIvwpd5Lwtv/Av8/bftsMCqFOAlo2XsDjQuhuOCnLdLY=\n-----END PUBLIC KEY-----\n",
+  "hash_chain": {
+    "rule": "sha256(JSON.stringify({sequenceNumber, previousHash, timestamp, moduleId, eventType, provenanceTag, parameters, outcome, clerkReceipt})); genesis previousHash = 64 zeros",
+    "entries": [
+      {
+        "sequenceNumber": 0,
+        "hash": "703becec283a77b378637a6bcb3bf79c51c78f2e8ba909ff29e354083a2d80ff",
+        "previousHash": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      {
+        "sequenceNumber": 1,
+        "hash": "3969e944dfd54c93e823e24a5a01835056d4ea935cbd0aa14fd36951c0f51808",
+        "previousHash": "703becec283a77b378637a6bcb3bf79c51c78f2e8ba909ff29e354083a2d80ff"
+      },
+      {
+        "sequenceNumber": 2,
+        "hash": "abe6de25dc32f4e6acf9862d30916504c91a8bd6bfa1ce3c38be5d8ede48f1f6",
+        "previousHash": "3969e944dfd54c93e823e24a5a01835056d4ea935cbd0aa14fd36951c0f51808"
+      },
+      {
+        "sequenceNumber": 3,
+        "hash": "9da9efa8574d56d89680217063fc4732374b9a5a6032caeaa7367a62a3b49cc8",
+        "previousHash": "abe6de25dc32f4e6acf9862d30916504c91a8bd6bfa1ce3c38be5d8ede48f1f6"
+      },
+      {
+        "sequenceNumber": 4,
+        "hash": "915b1e117af2f3904f99018c9b8919d6691312b8d4382324397b3d897775451d",
+        "previousHash": "9da9efa8574d56d89680217063fc4732374b9a5a6032caeaa7367a62a3b49cc8"
+      }
+    ]
+  },
+  "receipt_valid": {
+    "receipt": {
+      "seq_no": 3,
+      "head_hash": "9da9efa8574d56d89680217063fc4732374b9a5a6032caeaa7367a62a3b49cc8",
+      "witness_ts": 1700000000123,
+      "witness_sig": "/ZxFjBXZZNtnRXCDCjIbXaiYBPXDC9STDS7SBXEXfwJ7wg90NoNWbr9InAzPd/LCzPPie4V1ckyX88jhNU/KDg=="
+    },
+    "preimage": "3 9da9efa8574d56d89680217063fc4732374b9a5a6032caeaa7367a62a3b49cc8 1700000000123",
+    "expect": "verifies"
+  },
+  "clerk_receipt_valid": {
+    "clerk_public_key": "clerk_public_key_spki_pem",
+    "record_signed": {
+      "kind": "SUBMISSION",
+      "submitter_id": "vector-submitter",
+      "channel": "vector-channel",
+      "clerk_id": "vector-clerk",
+      "clerk_boot_id": "vector-boot",
+      "clerk_seq": 0,
+      "clerk_time": {
+        "wall_ms": 1700000500000,
+        "monotonic_ns": "1000"
+      },
+      "prev_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "signature_alg": "ed25519",
+      "declared_timestamp": 1700000000007,
+      "payload_commitment": "42825f1ffe8b3ad355601731e8bfa14e5cbedd613fe13720662c7738c777760e",
+      "separation": "SEPARATE_PROCESS",
+      "intake": "SOCKET",
+      "receipt_hash": "5e60b6a42fe1f719cd618ab8f284244eb4a76a79cfad43f7a37cce1272d66d76",
+      "signature": "xS96wRSaUHzUlKJBYObTXVMgSn0AR22Ci2fNBcmv+Yque2jZ062s+HVy7/FrGQsU1aJ+rkQU4Z8CpMpx8CAzBg=="
+    },
+    "payload": {
+      "timestamp": 1700000000007,
+      "moduleId": "test",
+      "eventType": "unit",
+      "provenanceTag": "LaneA",
+      "parameters": {
+        "n": 7
+      },
+      "outcome": "ok"
+    },
+    "preimage": "{\"channel\":\"vector-channel\",\"clerk_boot_id\":\"vector-boot\",\"clerk_id\":\"vector-clerk\",\"clerk_seq\":0,\"clerk_time\":{\"monotonic_ns\":\"1000\",\"wall_ms\":1700000500000},\"declared_timestamp\":1700000000007,\"intake\":\"SOCKET\",\"kind\":\"SUBMISSION\",\"payload_commitment\":\"42825f1ffe8b3ad355601731e8bfa14e5cbedd613fe13720662c7738c777760e\",\"prev_receipt_hash\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"separation\":\"SEPARATE_PROCESS\",\"signature_alg\":\"ed25519\",\"submitter_id\":\"vector-submitter\"}",
+    "expect": "verifies"
+  },
+  "clerk_receipt_wrong_payload": {
+    "clerk_public_key": "clerk_public_key_spki_pem",
+    "record_signed": {
+      "kind": "SUBMISSION",
+      "submitter_id": "vector-submitter",
+      "channel": "vector-channel",
+      "clerk_id": "vector-clerk",
+      "clerk_boot_id": "vector-boot",
+      "clerk_seq": 0,
+      "clerk_time": {
+        "wall_ms": 1700000500000,
+        "monotonic_ns": "1000"
+      },
+      "prev_receipt_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "signature_alg": "ed25519",
+      "declared_timestamp": 1700000000007,
+      "payload_commitment": "42825f1ffe8b3ad355601731e8bfa14e5cbedd613fe13720662c7738c777760e",
+      "separation": "SEPARATE_PROCESS",
+      "intake": "SOCKET",
+      "receipt_hash": "5e60b6a42fe1f719cd618ab8f284244eb4a76a79cfad43f7a37cce1272d66d76",
+      "signature": "xS96wRSaUHzUlKJBYObTXVMgSn0AR22Ci2fNBcmv+Yque2jZ062s+HVy7/FrGQsU1aJ+rkQU4Z8CpMpx8CAzBg=="
+    },
+    "payload": {
+      "timestamp": 1700000000008,
+      "moduleId": "test",
+      "eventType": "unit",
+      "provenanceTag": "LaneA",
+      "parameters": {
+        "n": 8
+      },
+      "outcome": "ok"
+    },
+    "expect": "does_not_verify (payload_commitment mismatch)"
+  },
+  "canonical_examples": [
+    {
+      "input": {
+        "b": 1,
+        "a": 2
+      },
+      "canonical": "{\"a\":2,\"b\":1}"
+    },
+    {
+      "input": {
+        "x": [
+          1,
+          {
+            "y": "z"
+          }
+        ],
+        "n": null
+      },
+      "canonical": "{\"n\":null,\"x\":[1,{\"y\":\"z\"}]}"
+    },
+    {
+      "input": {
+        "a": 1
+      },
+      "canonical": "{\"a\":1}"
+    }
+  ],
+  "receipt_altered_seq": {
+    "receipt": {
+      "seq_no": 4,
+      "head_hash": "9da9efa8574d56d89680217063fc4732374b9a5a6032caeaa7367a62a3b49cc8",
+      "witness_ts": 1700000000123,
+      "witness_sig": "/ZxFjBXZZNtnRXCDCjIbXaiYBPXDC9STDS7SBXEXfwJ7wg90NoNWbr9InAzPd/LCzPPie4V1ckyX88jhNU/KDg=="
+    },
+    "preimage": "4 9da9efa8574d56d89680217063fc4732374b9a5a6032caeaa7367a62a3b49cc8 1700000000123",
+    "expect": "does_not_verify"
+  }
+}

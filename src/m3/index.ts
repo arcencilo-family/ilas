@@ -38,7 +38,7 @@ export class CanaryManager {
       rotatedAt: null,
     };
     this.canaries.set(id, token);
-    this.log?.append({
+    this.log?.enqueue({
       timestamp: token.plantedAt,
       moduleId: "m3",
       eventType: "canary_planted",
@@ -70,7 +70,7 @@ export class CanaryManager {
     const severity: CheckSeverity =
       recentHits.length >= QUARANTINE_THRESHOLD ? "quarantine" : "alarm";
 
-    this.log?.append({
+    this.log?.enqueue({
       timestamp: now,
       moduleId: "m3",
       eventType: "canary_hit",

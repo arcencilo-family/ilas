@@ -4,14 +4,11 @@
   "description": "Integrity Layer for Agentic Systems",
   "main": "dist/index.js",
   "scripts": {
+    "test": "find src packages -name '*.test.ts' -not -path '*/node_modules/*' -print0 | sort -z | xargs -0 -n1 ts-node",
+    "test:list": "find src packages -name '*.test.ts' -not -path '*/node_modules/*' | sort",
     "build": "tsc",
     "dev": "ts-node src/index.ts",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@types/express": "^5.0.6",
-    "crypto": "^1.0.1",
-    "express": "^5.2.1"
+    "typecheck": "tsc --noEmit && tsc -p packages/clerk && tsc -p packages/witness"
   },
   "devDependencies": {
     "@types/node": "^20.12.0",

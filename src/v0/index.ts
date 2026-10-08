@@ -1,7 +1,7 @@
 // ──────────────────────────────────────────────────────────────────────────────
 // ILAS — V0 Verdict Engine
 // Patch: confidence decay (freshness as N = N0 * e^(-lambda*t))
-// Added: 2026-06-13 (CEST) — Uncle Frank + AI colleagues
+// Added: 2026-06-13 (CEST) — Frank Böhm + AI colleagues
 //
 // What changed and why:
 //   The existing setStalenessTimeout() degrades state on a fixed push-timer.
@@ -79,7 +79,7 @@ export class VerdictEngine {
   private transition(next: IntegrityState, reason: string): void {
     this.state = next;
     this.pushHistory(next, reason);
-    this.log.append({
+    this.log.enqueue({
       timestamp: Date.now(),
       moduleId: "v0",
       eventType: "state_transition",
@@ -92,7 +92,7 @@ export class VerdictEngine {
   // ── public API ─────────────────────────────────────────────────────────────
 
   processSignal(signal: ModuleSignal): IntegrityState {
-    this.log.append({
+    this.log.enqueue({
       timestamp: signal.timestamp,
       moduleId: signal.moduleId,
       eventType: "signal_received",
@@ -126,7 +126,7 @@ export class VerdictEngine {
   ): IntegrityState {
     this.resetStalenessTimer();
 
-    this.log.append({
+    this.log.enqueue({
       timestamp: Date.now(),
       moduleId: "v0",
       eventType: "verification_cycle",
@@ -208,7 +208,7 @@ export class VerdictEngine {
     this.decayLambda = lambdaPerMs;
     this.decayFloor = floor;
     this.markFresh("decay enabled");
-    this.log.append({
+    this.log.enqueue({
       timestamp: this.clock(),
       moduleId: "v0",
       eventType: "decay_configured",
@@ -276,7 +276,15 @@ export class VerdictEngine {
       this.stalenessTimer = null;
       const next = DEGRADE_PATH[this.state];
       if (next !== undefined) {
-        this.transition(next, "staleness timeout: no verification cycle");
+        // A timer has no caller: a throw here would be an uncaught exception
+        // and end the process. The append can fail (a log that was closed,
+        // superseded or cannot write). Keep the failure in the log instead;
+        // settle() (ILASKillStack.settleEvidence()) throws it.
+        try {
+          this.transition(next, "staleness timeout: no verification cycle");
+        } catch (err) {
+          this.log.keepFailure(err);
+        }
       }
       this.resetStalenessTimer();
     }, this.stalenessMs);

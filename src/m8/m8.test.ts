@@ -1,6 +1,6 @@
 // ──────────────────────────────────────────────────────────────────────────────
 // ILAS / M8 Conservation Auditor tests
-// 2026-06-13 (CEST), Uncle Frank + AI colleagues
+// 2026-06-13 (CEST), Frank Böhm + AI colleagues
 // Hand-rolled to match the other modules' test style. Deterministic via an
 // injected fake clock where time matters.
 // ──────────────────────────────────────────────────────────────────────────────
@@ -52,7 +52,7 @@ test("clean pair: call -> result -> close emits no alarm", () => {
   assert.strictEqual(c.signal, undefined);
 });
 
-// 2. ORPHAN: result without a prior matching call -> hard_alarm (strict W1)
+// 2. ORPHAN: result without a prior matching call -> hard_alarm (strict)
 test("orphan: result with no prior call -> hard_alarm", () => {
   const audit = new ConservationAuditor(new LockedEvidenceLog());
   const r = audit.ingestResult("ghost-1", "s1", "a1", "bash");
@@ -77,8 +77,8 @@ test("dangling at session close -> soft_alarm with the dangling callIds listed",
 });
 
 // 4. DANGLING MID-SESSION past threshold = INFORMATIONAL, NOT an alarm.
-//    This test asserts the explicit Frank ruling: do not grade a liveness
-//    budget as a security signal.
+//    This test asserts a deliberate design decision: a liveness budget is
+//    never graded as a security signal.
 test("dangling mid-session past threshold is liveness info, NOT a signal", () => {
   const c = fakeClock();
   const audit = new ConservationAuditor(new LockedEvidenceLog(), c.now);
@@ -156,7 +156,7 @@ test("session_close evicts state, no carryover", () => {
   assert.strictEqual(c.status, "clean");
 });
 
-// 9. Late result after session_close is treated as orphan (W1 strict semantics
+// 9. Late result after session_close is treated as orphan (strict semantics
 //    at the live layer; L0 replay can disambiguate post-hoc).
 test("late result after session_close is orphan in live view", () => {
   const audit = new ConservationAuditor(new LockedEvidenceLog());

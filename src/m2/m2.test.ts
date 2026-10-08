@@ -225,6 +225,26 @@ check("getRotationCount() increases with each rotate() call", () => {
   assert.strictEqual(fresh.getRotationCount(), 2);
 });
 
+// ── a caller's edits to a rotate() result change nothing inside ───────────────
+
+check("editing rotate().selectedFamilies leaves the active set and the logged rotation alone", () => {
+  const l = new LockedEvidenceLog();
+  const r2 = new DetectionRotator(l);
+  for (const id of ["a", "b", "c", "d"]) r2.registerFamily(id, id, () => cleanSignal(id));
+  const result = r2.rotate();
+  const active = r2.getActiveFamilies();
+  const logged = [...(l.getAll().find((e) => e.eventType === "rotation")!.parameters.selectedFamilies as string[])];
+  result.selectedFamilies.sort().reverse();
+  result.selectedFamilies.push("zzz");
+  assert.deepStrictEqual(r2.getActiveFamilies(), active, "the caller changed which families run");
+  assert.ok(!r2.getActiveFamilies().includes("zzz"));
+  assert.deepStrictEqual(
+    l.getAll().find((e) => e.eventType === "rotation")!.parameters.selectedFamilies,
+    logged
+  );
+  assert.deepStrictEqual(l.verify(), { valid: true });
+});
+
 // ── L0 chain integrity ────────────────────────────────────────────────────────
 
 check("L0 chain valid after all operations", () => {

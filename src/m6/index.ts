@@ -43,7 +43,7 @@ export class PrivilegeManager {
     // Cooling-off check: any same-level escalation still cooling off?
     for (const esc of this.escalations.values()) {
       if (esc.level === level && esc.coolOffUntil > now) {
-        this.log?.append({
+        this.log?.enqueue({
           timestamp: now,
           moduleId: "m6",
           eventType: "escalation_denied",
@@ -88,7 +88,7 @@ export class PrivilegeManager {
     const alarm = newRollingUsage >= ROLLING_CAP_MS;
     const status: EscalateStatus = alarm ? "granted_soft_alarm" : "granted";
 
-    this.log?.append({
+    this.log?.enqueue({
       timestamp: now,
       moduleId: "m6",
       eventType: "escalation_granted",
@@ -119,7 +119,7 @@ export class PrivilegeManager {
     if (!esc || esc.revokedAt !== null) return false;
     const now = Date.now();
     esc.revokedAt = now;
-    this.log?.append({
+    this.log?.enqueue({
       timestamp: now,
       moduleId: "m6",
       eventType: "escalation_revoked",
